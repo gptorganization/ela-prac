@@ -37,6 +37,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'
+
+    // 아래 링크에서 이슈 해결한 내용 있음(gradle 9.0 어쩌구 에러)
+    // https://github.com/eclipse/buildship/issues/980#issuecomment-665124002
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
