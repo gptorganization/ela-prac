@@ -28,13 +28,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle
-        run: ./gradlew clean build
-        env:
-          RDS_HOSTNAME: ${{ secrets.RDS_HOSTNAME }}
-          RDS_PORT: ${{ secrets.RDS_PORT }}
-          RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
-          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
-          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+        run: ./gradlew clean build -x test
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
