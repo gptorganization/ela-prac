@@ -29,7 +29,6 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build
-        shell: bash
         env:
           RDS_HOSTNAME: ${{ secrets.RDS_HOSTNAME }}
           RDS_PORT: ${{ secrets.RDS_PORT }}
