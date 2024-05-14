@@ -37,13 +37,7 @@ jobs:
           server:
             port: 5000
           
-          spring:
-            datasource:
-              driver-class-name: org.mariadb.jdbc.Driver
-              url: jdbc:mariadb://${rds.hostname}:${rds.port}/${rds.db.name}
-              username: ${rds.username}
-              password: ${rds.password}
-          
+          spring:          
             jpa:
               generate-ddl: false
               show-sql: true
