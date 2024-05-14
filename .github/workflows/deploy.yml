@@ -37,7 +37,13 @@ jobs:
           server:
             port: 5000
           
-          spring:          
+          spring:
+            datasource:
+              driver-class-name: org.mariadb.jdbc.Driver
+              url: jdbc:mariadb://\${RDS_HOSTNAME}:\${RDS_PORT}/\${RDS_DB_NAME}
+              username: \${RDS_USERNAME}
+              password: \${RDS_PASSWORD}
+          
             jpa:
               generate-ddl: false
               show-sql: true
@@ -45,12 +51,6 @@ jobs:
               properties:
                 hibernate:
                   '[format_sql]': true
-          
-            datasource:
-              driver-class-name: org.mariadb.jdbc.Driver
-              url: jdbc:mariadb://\${RDS_HOSTNAME}:\${RDS_PORT}/\${RDS_DB_NAME}
-              username: \${RDS_USERNAME}
-              password: \${RDS_PASSWORD}
           EOL
 
       - name: Set Yaml
