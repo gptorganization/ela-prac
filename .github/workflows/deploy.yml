@@ -8,7 +8,7 @@ on:
   push:
     branches: ["main", "dev/feature1"]
 #  pull_request:
-#    types: [ opened, reopened, synchronize ]
+#    types: [opened, reopened, synchronize]
 
 jobs:
   build:
@@ -27,8 +27,57 @@ jobs:
         run: chmod +x ./gradlew
         shell: bash
 
+      - name: Install envsubst
+        run: sudo apt-get install -y gettext
+
+      - name: Create application.yml.template
+        run: |
+          mkdir -p src/main/resources
+          cat > src/main/resources/application.yml.template <<EOL
+          server:
+            port: 5000
+          
+          spring:
+            datasource:
+              driver-class-name: org.mariadb.jdbc.Driver
+              url: jdbc:mariadb://\${RDS_HOSTNAME}:\${RDS_PORT}/\${RDS_DB_NAME}
+              username: \${RDS_USERNAME}
+              password: \${RDS_PASSWORD}
+          
+            jpa:
+              generate-ddl: false
+              show-sql: true
+              database: mysql
+              properties:
+                hibernate:
+                  '[format_sql]': true
+          EOL
+
+      - name: Set Yaml
+        run: |
+          envsubst < src/main/resources/application.yml.template > src/main/resources/application.yml
+          echo "Generated application.yml:"
+          cat src/main/resources/application.yml
+        env:
+          RDS_HOSTNAME: ${{ secrets.RDS_HOSTNAME }}
+          RDS_PORT: ${{ secrets.RDS_PORT }}
+          RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
+          RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+          RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+
+      - name: Check for Tests
+        run: |
+          if git diff --name-only origin/main HEAD | grep -qvE '(\.xml$|\.yml$|config/)'; then
+            if [ -z "$(find src/test -name '*ServiceTest.java')" ]; then
+              echo "No ServiceTest found, failing the build."
+              exit 1
+            fi
+          else
+            echo "Only configuration files changed, skipping test check."
+          fi
+
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean build
 
       - name: Get current time
         uses: 1466587594/get-current-time@v2
@@ -50,15 +99,12 @@ jobs:
           # Optional
           LANGUAGE: Korean
           OPENAI_API_ENDPOINT: https://api.openai.com/v1
-          MODEL: gpt-3.5-turbo # https://platform.openai.com/docs/models
+          MODEL: gpt-3.5-turbo
           PROMPT: Please check if there are any confusions or irregularities in the following code diff
-          top_p: 1 # https://platform.openai.com/docs/api-reference/chat/create#chat/create-top_p
-          temperature: 1 # https://platform.openai.com/docs/api-reference/chat/create#chat/create-temperature
+          top_p: 1
+          temperature: 1
           max_tokens: 10000
-          MAX_PATCH_LENGTH: 10000 # if the patch/diff length is large than MAX_PATCH_LENGTH, will be ignored and won't review. By default, with no MAX_PATCH_LENGTH set, there is also no limit for the patch/diff length.
-
-      - name: Show Current Time
-        run: echo "CurrentTime=$"
+          MAX_PATCH_LENGTH: 10000
 
       - name: Generate deployment package
         run: |
@@ -74,8 +120,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: bean-prac
-          environment_name: Bean-prac-env-1
+          application_name: test-ela
+          environment_name: Test-ela-env
           version_label: github-action-${{steps.current-time.outputs.formattedTime}}
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip
