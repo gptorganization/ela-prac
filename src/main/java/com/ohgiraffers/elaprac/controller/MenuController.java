@@ -19,7 +19,7 @@ public class MenuController {
 
     @GetMapping("health")
     public String healthCheck() {
-        return "home ela-prac is fine!! application.yml만 사용 after!! 5/21";
+        return "home ela-prac is fine!! application.yml만 사용 after!! 6/29";
     }
 
     @GetMapping("menus/{menuCode}")
